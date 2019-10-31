@@ -5,18 +5,17 @@ import (
 	"time"
 )
 
-
 type QueryGuestAck struct {
-	Id 			int
-	Name 		string
-	Money 		int
+	Id          int
+	Name        string
+	Money       int
 	AttendCount int
 	EntryTime   string
 }
 
 type GuestRankHelper []*QueryGuestAck
 
-func(g GuestRankHelper) Len() int {
+func (g GuestRankHelper) Len() int {
 	return len(g)
 }
 
@@ -37,14 +36,14 @@ func (g GuestRankHelper) Less(i, j int) bool {
 }
 
 type QueryStatAck struct {
-	HouseHoldNum   	int
-	GuestPersonNum 	int
+	HouseHoldNum    int
+	GuestPersonNum  int
 	TotalGuestMoney int
-	RankList 		[]*LastName_Money
+	RankList        []*LastName_Money
 }
 
 type LastName_Money struct {
-	LastName  	string
+	LastName    string
 	TotalMoney  int
 	PersonCount int
 }
@@ -78,7 +77,6 @@ func (rl RankingList) Swap(i, j int) {
 	rl[i], rl[j] = rl[j], rl[i]
 }
 
-
 func TimeStampToString(secs, nanoSecs int64) string {
 	layout := "2006-01-02 15:04:06"
 	return time.Unix(secs, nanoSecs).Format(layout)
@@ -98,11 +96,10 @@ func DateTimeStringToStamp(dateTimeStr string) int64 {
 }
 
 type CSCommonAck struct {
-
 }
 
-func PackJsonAck(code int, msg string, dataAck interface{})interface{}{
-	var  commAck struct  {
+func PackJsonAck(code int, msg string, dataAck interface{}) interface{} {
+	var commAck struct {
 		ErrCode int
 		ErrMsg  string
 		Data    interface{}

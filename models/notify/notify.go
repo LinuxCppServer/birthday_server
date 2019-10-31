@@ -1,13 +1,13 @@
 package notify
 
 import (
-	"time"
-	"fmt"
-	"net/http"
-	"io/ioutil"
-	"encoding/json"
-	"bytes"
 	. "birthday_server/models/log"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
 )
 
 const (
@@ -15,33 +15,32 @@ const (
 	T_NOTIFY_STAT
 )
 const (
-	get_token_http_format_url    = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=%s&corpsecret=%s"
-	send_notify_http_format_url  = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=%s"
-	global_corpid      = "wwfce4639dddb21018"
-	msg_notify_app_agentid = 1000003
-	msg_notify_app_scretid = "KRjAUS2coRBR1jiFb6ta_FaR5yFuhrpilaGdmy18MDU"
-	stat_notify_app_agentid = 1000004
-	stat_notify_app_scretid = "eIw1Uz--jPl50jox2NKSqu_KevvYORxDWQn8z2LzPGI"
+	get_token_http_format_url   = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=%s&corpsecret=%s"
+	send_notify_http_format_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=%s"
+	global_corpid               = "wwfce4639dddb21018"
+	msg_notify_app_agentid      = 1000003
+	msg_notify_app_scretid      = "KRjAUS2coRBR1jiFb6ta_FaR5yFuhrpilaGdmy18MDU"
+	stat_notify_app_agentid     = 1000004
+	stat_notify_app_scretid     = "eIw1Uz--jPl50jox2NKSqu_KevvYORxDWQn8z2LzPGI"
 )
 
-
 type NotifyApp struct {
-	appid int				//is same with agent_id
-	Token string			//token for this app
-	flush_time int64		//记录最近一次获取token成功的时间戳
+	appid      int    //is same with agent_id
+	Token      string //token for this app
+	flush_time int64  //记录最近一次获取token成功的时间戳
 }
 
 var (
 	notifyScretMap map[int]string = map[int]string{
-		msg_notify_app_agentid: msg_notify_app_scretid,
-		stat_notify_app_agentid:stat_notify_app_scretid,
+		msg_notify_app_agentid:  msg_notify_app_scretid,
+		stat_notify_app_agentid: stat_notify_app_scretid,
 	}
 	GMsgNotify, GStatNotify *NotifyApp
 )
 
 func init() {
 	GMsgNotify = &NotifyApp{msg_notify_app_agentid, "", 0}
-	GStatNotify= &NotifyApp{stat_notify_app_agentid, "", 0}
+	GStatNotify = &NotifyApp{stat_notify_app_agentid, "", 0}
 	fmt.Printf("notify Component started...")
 }
 
@@ -54,7 +53,7 @@ func (a *NotifyApp) GetNotifyAccessToken() (token string, err error) {
 		secretid = val
 	}
 	now := time.Now().Unix()
-	if a.Token == "" || now - a.flush_time > 7200 {
+	if a.Token == "" || now-a.flush_time > 7200 {
 		url := fmt.Sprintf(get_token_http_format_url, global_corpid, secretid)
 		var resp *http.Response
 		Glog.Debug("get token by: %s", url)
@@ -69,10 +68,10 @@ func (a *NotifyApp) GetNotifyAccessToken() (token string, err error) {
 		}
 
 		var server_node_resp struct {
-			Code   int 		`json:errcode`
-			Errmsg string 	`json:"errmsg"`
-			Token  string	`json:"access_token"`
-			Expire int64 	`json:"expires_in"`
+			Code   int    `json:errcode`
+			Errmsg string `json:"errmsg"`
+			Token  string `json:"access_token"`
+			Expire int64  `json:"expires_in"`
 		}
 
 		buf, e := ioutil.ReadAll(resp.Body)
@@ -101,7 +100,7 @@ type NotifyRequest struct {
 	Safe    int               `json:"safe"`
 }
 
-func (n *NotifyApp) NotifyEveryOne(content string) (error){
+func (n *NotifyApp) NotifyEveryOne(content string) error {
 	token, err := n.GetNotifyAccessToken()
 	if err != nil {
 		Glog.Error("get notify token failed: err=%s", err.Error())
@@ -118,7 +117,7 @@ func (n *NotifyApp) NotifyEveryOne(content string) (error){
 		Glog.Error("send notify failed: err=%s", err.Error())
 		return err
 	}
-	var resp_server_node struct{
+	var resp_server_node struct {
 		Errcode int    `json:"errcode`
 		Errmsg  string `json:"errmsg"`
 	}
@@ -134,12 +133,12 @@ func (n *NotifyApp) NotifyEveryOne(content string) (error){
 	return nil
 }
 
-func (n *NotifyApp) make_send_text(content string)(msg []byte) {
+func (n *NotifyApp) make_send_text(content string) (msg []byte) {
 	req := &NotifyRequest{
-		Touser: "@all",
+		Touser:  "@all",
 		Toparty: "@all",
 		Totag:   "@all",
-		Msgtype:  "text",
+		Msgtype: "text",
 	}
 	textMap := make(map[string]string)
 	textMap["content"] = content
@@ -161,7 +160,7 @@ func TestGetToken() {
 }
 
 func TestSendNotify() {
-	if err := GMsgNotify.NotifyEveryOne("hello,everyone!"); err!= nil {
+	if err := GMsgNotify.NotifyEveryOne("hello,everyone!"); err != nil {
 		Glog.Debug("send notify to everyone failed...")
 	}
 }

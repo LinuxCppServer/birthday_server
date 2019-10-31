@@ -1,36 +1,36 @@
 package stat
 
 import (
-	"database/sql"
-	"birthday_server/models/mysql"
-	"fmt"
 	"birthday_server/models/json_def"
+	. "birthday_server/models/log"
+	"birthday_server/models/mysql"
+	"database/sql"
+	"fmt"
 	"sort"
 	"time"
-	. "birthday_server/models/log"
 )
 
 //todo read from conf
 const (
-	MAX_HOUSEHOLD_BOOKED    = 5//80 	//预定户数
-	MAX_TABLE_BOOKED		= 16 		//预定桌数
-	MAX_GUEST_PERSON_BOOKED = 20//160	//预定人数
-	MONEY_PACK_FOR_BACK_VAL = 12		//回礼红包价值
-	MONEY_PACK_FOR_TEA_VAL  = 4			//茶红包价值
+	MAX_HOUSEHOLD_BOOKED    = 5  //80 	//预定户数
+	MAX_TABLE_BOOKED        = 16 //预定桌数
+	MAX_GUEST_PERSON_BOOKED = 20 //160	//预定人数
+	MONEY_PACK_FOR_BACK_VAL = 12 //回礼红包价值
+	MONEY_PACK_FOR_TEA_VAL  = 4  //茶红包价值
 )
 
 func SubTotalInfo() (info string) {
 	var (
-		resp  error
-		rows *sql.Rows
-		householdsCount    int			//户数
-		guestPersonCount   int			//人数
-		totalGuestMoney    int 			//总礼金
-		guestAdded		   int 			//赶席总人数
-		tableAdded 		   int 			//赶席桌数
-		moneyTotalAdded    int 			//需要准备的现金数
+		resp             error
+		rows             *sql.Rows
+		householdsCount  int //户数
+		guestPersonCount int //人数
+		totalGuestMoney  int //总礼金
+		guestAdded       int //赶席总人数
+		tableAdded       int //赶席桌数
+		moneyTotalAdded  int //需要准备的现金数
 
-		name, entry_time, sql string   = "", " ", "select * from t_guest_money"
+		name, entry_time, sql   string = "", " ", "select * from t_guest_money"
 		id, money, attend_count int
 	)
 
@@ -45,14 +45,14 @@ func SubTotalInfo() (info string) {
 		}
 		householdsCount++
 		guestPersonCount += attend_count
-		totalGuestMoney  += money
+		totalGuestMoney += money
 	}
 
 	bIsNeedMoneyPack := false
 	if householdsCount > MAX_HOUSEHOLD_BOOKED {
 		bIsNeedMoneyPack = true
 		exceedHousholds := householdsCount - MAX_HOUSEHOLD_BOOKED
-		moneyTotalAdded  += (exceedHousholds * MONEY_PACK_FOR_BACK_VAL)
+		moneyTotalAdded += (exceedHousholds * MONEY_PACK_FOR_BACK_VAL)
 		info += fmt.Sprintf("回礼红包个数: %d", exceedHousholds)
 	}
 	if guestPersonCount > MAX_GUEST_PERSON_BOOKED {
@@ -61,7 +61,7 @@ func SubTotalInfo() (info string) {
 		moneyTotalAdded += (exceedGuests * MONEY_PACK_FOR_TEA_VAL)
 		guestAdded = exceedGuests
 		tableAdded = exceedGuests / 10
-		if guestAdded % 10 >= 5 {
+		if guestAdded%10 >= 5 {
 			tableAdded++
 		}
 		info += fmt.Sprintf("\n茶红包个数(赶席人数): %d", guestAdded)
@@ -75,15 +75,15 @@ func SubTotalInfo() (info string) {
 	return
 }
 
-func GuestMoneyContribution() ( *json_def.QueryStatAck){
+func GuestMoneyContribution() *json_def.QueryStatAck {
 	var (
-		rows *sql.Rows
-		resp error
-		householdsCount    int			//户数
-		guestPersonCount   int			//人数
-		totalGuestMoney    int 			//总礼金
-		ret  *json_def.QueryStatAck = &json_def.QueryStatAck{}
-		name, entry_time, sql string   = "", " ", "select * from t_guest_money"
+		rows                    *sql.Rows
+		resp                    error
+		householdsCount         int                    //户数
+		guestPersonCount        int                    //人数
+		totalGuestMoney         int                    //总礼金
+		ret                     *json_def.QueryStatAck = &json_def.QueryStatAck{}
+		name, entry_time, sql   string                 = "", " ", "select * from t_guest_money"
 		id, money, attend_count int
 
 		lastNameMoneyMap  map[string]int = make(map[string]int)
@@ -105,16 +105,16 @@ func GuestMoneyContribution() ( *json_def.QueryStatAck){
 			lastNameMoneyMap[lastName], lastNamePersonMap[lastName] = money, 1
 		} else {
 			lastNameMoneyMap[lastName] += money
-			lastNamePersonMap[lastName]+= 1
+			lastNamePersonMap[lastName] += 1
 		}
 		householdsCount++
 		guestPersonCount += attend_count
-		totalGuestMoney  += money
+		totalGuestMoney += money
 	}
 	if householdsCount != 0 {
-		ret.GuestPersonNum  = guestPersonCount
+		ret.GuestPersonNum = guestPersonCount
 		ret.TotalGuestMoney = totalGuestMoney
-		ret.HouseHoldNum    = householdsCount
+		ret.HouseHoldNum = householdsCount
 
 		var rankList json_def.RankingList
 		rankList.Init(lastNameMoneyMap, lastNamePersonMap)

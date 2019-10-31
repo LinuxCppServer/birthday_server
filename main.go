@@ -1,11 +1,10 @@
 package main
 
 import (
-	_ "birthday_server/routers"
-	"birthday_server/models/mysql"
-	"github.com/astaxie/beego"
 	. "birthday_server/models/log"
-
+	"birthday_server/models/mysql"
+	_ "birthday_server/routers"
+	"github.com/astaxie/beego"
 )
 
 func main() {
@@ -16,4 +15,3 @@ func main() {
 	mysql.ReleaseDB()
 	Glog.Debug("server exited safely...")
 }
-

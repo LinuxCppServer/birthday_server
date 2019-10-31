@@ -2,17 +2,17 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
-	"time"
+	"birthday_server/models/json_def"
+	. "birthday_server/models/log"
 	"birthday_server/models/mysql"
-	"fmt"
-	"database/sql"
-	"strconv"
 	. "birthday_server/models/notify"
 	"birthday_server/models/stat"
-	"birthday_server/models/json_def"
+	"database/sql"
+	"fmt"
+	"github.com/astaxie/beego"
 	"sort"
-	. "birthday_server/models/log"
+	"strconv"
+	"time"
 )
 
 type GuestManageController struct {
@@ -30,9 +30,9 @@ func (gmc *GuestManageController) AddNewGuest() {
 	}
 	var money, attend_count int
 	var name string
-	var err  error
+	var err error
 	name = gmc.GetString("name")
-	if money, err = gmc.GetInt("money");err != nil {
+	if money, err = gmc.GetInt("money"); err != nil {
 		Glog.Error("money isn't int-like: err=%s", err.Error())
 		gmc.Data["json"] = json_def.PackJsonAck(2, "增加宾客记录礼金参数应是整型数", nil)
 		gmc.ServeJSON()
@@ -93,16 +93,16 @@ func (gmc *GuestManageController) DelGuestById() {
 	} else {
 		delHintInfo, basicInfo := "", "\nid:%d  姓名:%s  礼金:%d  出席人数:%d  录入时间:%s\n"
 		var (
-			_name, _entry_time string
+			_name, _entry_time         string
 			_id, _money, _attend_count int
-			rec_count int
+			rec_count                  int
 		)
 
 		for rows.Next() {
 			rec_count++
 			if e := rows.Scan(&_id, &_name, &_money, &_attend_count, &_entry_time); e != nil {
 				Glog.Error("scan record failed: id=%d name=%s monney=%d attend_count=%d entry_time=%s err=%s",
-					_id,_name, _money, _attend_count, _entry_time, e.Error())
+					_id, _name, _money, _attend_count, _entry_time, e.Error())
 				continue
 			}
 			delHintInfo += fmt.Sprintf(basicInfo, _id, _name, _money, _attend_count, _entry_time)
@@ -171,11 +171,11 @@ func (gmc *GuestManageController) ModifyGuestRecord() {
 		}
 		ssql += fmt.Sprintf("attend_count=%d,", attend_count)
 	}
-	ssql = ssql[:len(ssql) - 1]
+	ssql = ssql[:len(ssql)-1]
 	ssql += fmt.Sprintf("  where id=%d", id)
 	Glog.Debug("will modify guest record: id=%d sql=%s", id, ssql)
 
-	querySql, modHintInfo := fmt.Sprintf("select * from t_guest_money where id=%d", id),"宾客记录修改详情:"
+	querySql, modHintInfo := fmt.Sprintf("select * from t_guest_money where id=%d", id), "宾客记录修改详情:"
 	if rows, err := mysql.Cmd(mysql.MYSQL_CMD_QUERY, querySql); err != nil {
 		Glog.Error("query sql isn;t incorrect: err=%s", err.Error())
 		gmc.Data["json"] = json_def.PackJsonAck(14, err.Error(), nil)
@@ -190,7 +190,7 @@ func (gmc *GuestManageController) ModifyGuestRecord() {
 		}
 
 		var (
-			_name, _entry_time string
+			_name, _entry_time         string
 			_id, _money, _attend_count int
 		)
 		for rows.Next() {
@@ -211,7 +211,7 @@ func (gmc *GuestManageController) ModifyGuestRecord() {
 
 	rows, _ := mysql.Cmd(mysql.MYSQL_CMD_QUERY, querySql)
 	var (
-		_name, _entry_time string
+		_name, _entry_time         string
 		_id, _money, _attend_count int
 	)
 	for rows.Next() {
@@ -279,15 +279,15 @@ func (gmc *GuestManageController) QueryGuests() {
 		args = append(args, paraList[0])
 	case query_guest_by_last_name:
 		ssql = fmt.Sprintf(`select * from t_guest_money where name like '%s%%'`, paraList[0])
-		Glog.Debug("fuzzly query by last-name: last_name=%s, len(last_name)=%d sql=%s",paraList[0], len(paraList[0]),ssql)
+		Glog.Debug("fuzzly query by last-name: last_name=%s, len(last_name)=%d sql=%s", paraList[0], len(paraList[0]), ssql)
 	case query_guest_by_money_range:
 		Glog.Debug("fuzzly query by money range: [%s, %s]", paraList[0], paraList[1])
-	    var min, max int
-	    if min, err = strconv.Atoi(paraList[0]); err != nil {
-	    	Glog.Error("min range must be int-like")
+		var min, max int
+		if min, err = strconv.Atoi(paraList[0]); err != nil {
+			Glog.Error("min range must be int-like")
 			gmc.Data["json"] = json_def.PackJsonAck(20, fmt.Sprintf("礼金范围必须是整型数： min=%s", paraList[0]), nil)
 			gmc.ServeJSON()
-	    	return
+			return
 		}
 		if max, err = strconv.Atoi(paraList[1]); err != nil {
 			Glog.Error("max range must be int-like")
@@ -320,7 +320,7 @@ func (gmc *GuestManageController) QueryGuests() {
 		return
 	}
 
-	Glog.Debug("ssql=%s\nargs=%+v",ssql, args)
+	Glog.Debug("ssql=%s\nargs=%+v", ssql, args)
 	var rows *sql.Rows
 	rows, err = mysql.Cmd(mysql.MYSQL_CMD_QUERY, ssql, args...)
 	if err != nil {
@@ -333,7 +333,7 @@ func (gmc *GuestManageController) QueryGuests() {
 	list := []*json_def.QueryGuestAck{}
 	for rows.Next() {
 		name, entry_time := "", ""
-		id, money, attend_count := -1,0,0
+		id, money, attend_count := -1, 0, 0
 		if err = rows.Scan(&id, &name, &money, &attend_count, &entry_time); err != nil {
 			Glog.Error("result scan failed: err=%s", err.Error())
 			continue
@@ -342,9 +342,9 @@ func (gmc *GuestManageController) QueryGuests() {
 		list = append(list, &json_def.QueryGuestAck{
 			id,
 			name,
-			 money,
-			 attend_count,
-			 entry_time,
+			money,
+			attend_count,
+			entry_time,
 		})
 	}
 	sort.Sort(json_def.GuestRankHelper(list))

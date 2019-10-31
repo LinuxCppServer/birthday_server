@@ -5,15 +5,15 @@ import (
 	"io/ioutil"
 )
 
-var GServer struct{
-	LogPath  			  string
-	LogLevel 			  int
-	ConfPath 			  string
-	MaxHouseHoldBooked 	  int
-	MaxTableBooked     	  int
-	MaxGuestPersonBooked  int
-	MoneyPackForBackVal	  int
-	MoneyPackForTeaVal	  int
+var GServer struct {
+	LogPath              string
+	LogLevel             int
+	ConfPath             string
+	MaxHouseHoldBooked   int
+	MaxTableBooked       int
+	MaxGuestPersonBooked int
+	MoneyPackForBackVal  int
+	MoneyPackForTeaVal   int
 }
 
 func init() {
